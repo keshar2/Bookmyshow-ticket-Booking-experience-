@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookMyShow Ticket</title>
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Select Movie</h2>
+  <select id="movieSelect" onchange="initSeatMap()">
+    <option value="Movie 1">Movie 1</option>
+    <option value="Movie 2">Movie 2</option>
+    <option value="Movie 3">Movie 3</option>
+  </select>
+
+  <h3>Select Your Seats :</h3>
+  <div id="seatMap"></div>
+  <p>Selected Seats: <span id="selectedSeats">0</span></p>
+  <p>Seat Numbers: <span id="seatNumbers"></span></p>
+
+  <h3>Enter Your Full Name :</h3>
+  <input type="text" id="customerName" placeholder="Your Full Name">
+  <button onclick="bookTickets()">Confirm Booking</button>
+
+  <script>
+    const rows = 10;
+    const seatsInOneRow = 30;
+    let selectedSeats = 0;
+    let selectedSeatNum = [];
+    let movieSeats ={
+      'Movie 1': JSON.parse(sessionStorage.getItem('bookedSeats_Movie1')) || [],
+      'Movie 2': JSON.parse(sessionStorage.getItem('bookedSeats_Movie2')) || [],
+      'Movie 3': JSON.parse(sessionStorage.getItem('bookedSeats_Movie3')) || [],
+    };
+
+    const seatMap = document.getElementById('seatMap');
+    const selectedSeatsElement = document.getElementById('selectedSeats');
+    const seatNumbersElement = document.getElementById('seatNumbers');
+
+    function initSeatMap(){
+      seatMap.innerHTML = '';
+      const selectedMovie = document.getElementById('movieSelect').value;
+      for(let i = 1; i <= rows; i++){
+        for (let j = 1; j <= seatsInOneRow; j++) {
+          const seatId = `${i}-${j}`;
+          const isBooked = movieSeats[selectedMovie].includes(seatId) ? ' booked' : '';
+          seatMap.innerHTML += `<div class="seat${isBooked}" id="seat_${seatId}" onclick="selectSeat(${i}, ${j})">${j}</div>`;
+        }
+        seatMap.innerHTML +='<br>';
+      }
+    }
+
+    function selectSeat(row, seat){
+      const seatId = `${row}-${seat}`;
+      const seatElement = document.getElementById(`seat_${seatId}`);
+      if(seatElement.classList.contains('booked')){
+        alert('This seat is already booked.');
+        return;
+      }
+      if(seatElement.classList.contains('selected')){
+        seatElement.classList.remove('selected');
+        const index = selectedSeatNum.indexOf(seatId);
+        selectedSeatNum.splice(index, 1);
+      }else{
+        seatElement.classList.add('selected');
+        selectedSeats++;
+        selectedSeatNum.push(seatId);
+      }
+      selectedSeatsElement.textContent = selectedSeats;
+      seatNumbersElement.textContent = selectedSeatNum.join(', ');
+    }
+
+    function bookTickets(){
+      const selectedMovie = document.getElementById('movieSelect').value;
+      const customerName = document.getElementById('customerName').value;
+
+      if(selectedSeats === 0|| customerName === ''){
+        alert('Select seats and enter your name.');
+      }else{
+        movieSeats[selectedMovie] = movieSeats[selectedMovie].concat(selectedSeatNum);
+        sessionStorage.setItem(`bookedSeats_${selectedMovie}`, JSON.stringify(movieSeats[selectedMovie]));
+        alert(`${customerName}, Your Tickets are booked for ${selectedMovie}`);
+  
+        selectedSeats = 0; // to reset selected seats
+        selectedSeatNum =[];
+        selectedSeatsElement.textContent = selectedSeats;
+        seatNumbersElement.textContent = '';
+        initSeatMap();
+      }
+    }
+    initSeatMap();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+ 
+ 
+  
+
+   
+    
+    
+     
+   
+     
+
+
+  
